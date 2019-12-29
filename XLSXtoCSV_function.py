@@ -10,12 +10,21 @@ def xlsx_to_csv_purchase(filename_purchase_path,filename_purchase):
     """转换xlsx采购文件至csv文件"""
     #打开并读取xlsx文件
     filename_purchase_read=os.path.join(filename_purchase_path,filename_purchase)
+    table_purchase_title_req_all=['Vendor/supplying plant','Purchasing Document','Material','Short Text','Order Quantity','Order Unit']
     try:
         workbook_purchase = xlrd.open_workbook(filename_purchase_read)
     except xlrd.biffh.XLRDError:
         print('unsupported format')
     else:
         table_purchase = workbook_purchase.sheet_by_index(0)
+
+        #根据内容检索表头位置
+        table_purchase_title=table_purchase.row_values(0)
+        print(table_purchase.row_values(0))
+        table_purchase_title_req_position=[]
+        for table_purchase_title_req in table_purchase_title_req_all:
+            table_purchase_title_req_position.append(table_purchase_title.index(table_purchase_title_req))
+        print(table_purchase_title_req_position)
 
         #准备csv文件名
         purchase_order_name=os.path.splitext(filename_purchase)[0]
@@ -31,18 +40,18 @@ def xlsx_to_csv_purchase(filename_purchase_path,filename_purchase):
                 row_value_sel=[]
 
                 if row_num==0:
-                    row_value_sel=[r'Vendor number\供应商编号',r'Vendor name\供应商名称',r'Purchasing Document/采购订单号',
-                                   r'Material\物料代码',r'Short Text\描述',r'Plant\仓库编号','Order Quantity/数量','Order Unit']
+                    row_value_sel=['Vendor number/供应商编号','Vendor name/供应商名称','Purchasing Document/采购订单号',
+                                   'Material/物料代码','Short Text/描述','Plant/仓库编号','Order Quantity/数量','Order Unit/单位']
                 else:
                     row_value = table_purchase.row_values(row_num)
-                    row_value_sel.append(row_value[0][0:6])
-                    row_value_sel.append(row_value[0][6:].strip())
-                    row_value_sel.append(row_value[1])
-                    row_value_sel.append(row_value[2])
-                    row_value_sel.append(row_value[3])
+                    row_value_sel.append(row_value[table_purchase_title_req_position[0]][0:6])
+                    row_value_sel.append(row_value[table_purchase_title_req_position[0]][6:].strip())
+                    row_value_sel.append(row_value[table_purchase_title_req_position[1]])
+                    row_value_sel.append(row_value[table_purchase_title_req_position[2]])
+                    row_value_sel.append(row_value[table_purchase_title_req_position[3]])
                     row_value_sel.append(goods_owner)
-                    row_value_sel.append(row_value[4])
-                    row_value_sel.append(row_value[5])
+                    row_value_sel.append(row_value[table_purchase_title_req_position[4]])
+                    row_value_sel.append(row_value[table_purchase_title_req_position[5]])
 
                 print(row_num,row_value_sel)
                 write.writerow(row_value_sel)
@@ -101,5 +110,5 @@ def xlsx_to_csv_delivery_multi(filename_delivery_path, filename_delivery):
 
 
 if __name__ == '__main__':
-    xlsx_to_csv_delivery_multi('E:\STUDY\python\XLSXtoCSV\BEKOautowarehouse\delivery', 'export.XLSX')
+    #xlsx_to_csv_delivery_multi('E:\STUDY\python\XLSXtoCSV\BEKOautowarehouse\delivery', 'export.XLSX')
     xlsx_to_csv_purchase('E:\STUDY\python\XLSXtoCSV\BEKOautowarehouse\purchase', '4500226596.XLSX')
