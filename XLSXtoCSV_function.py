@@ -60,6 +60,9 @@ def xlsx_to_csv_delivery_multi(filename_delivery_path, filename_delivery):
     """转换xlsx发货文件至csv文件"""
     #打开并读取xlsx文件
     filename_delivery_read=os.path.join(filename_delivery_path,filename_delivery)
+    table_delivery_title_req_all = ['Delivery', 'Goods Issue Date','Ship-to party', 'Name of the ship-to party',
+                                    'Reference document','Material', 'Description','Delivery quantity']
+
     try:
         workbook_delivery = xlrd.open_workbook(filename_delivery_read)
     except xlrd.biffh.XLRDError:
@@ -67,6 +70,14 @@ def xlsx_to_csv_delivery_multi(filename_delivery_path, filename_delivery):
     else:
         table_delivery = workbook_delivery.sheet_by_index(0)
 
+        # 根据内容检索表头位置
+        table_delivery_title = table_delivery.row_values(0)
+        print(table_delivery.row_values(0))
+        table_delivery_title_req_position = []
+        for table_delivery_title_req in table_delivery_title_req_all:
+            table_delivery_title_req_position.append(table_delivery_title.index(table_delivery_title_req))
+        print(table_delivery_title_req_position)
+        
         delivery_order_names=[]
         for row_num in range(table_delivery.nrows-1):
             delivery_order_names.append(table_delivery.row_values(row_num+1)[0])
@@ -91,24 +102,24 @@ def xlsx_to_csv_delivery_multi(filename_delivery_path, filename_delivery):
                         print(row_num,row_value_sel)
                         write.writerow(row_value_sel)
                     elif row_value[0]==delivery_order_name:
-                        row_value_sel.append(row_value[0])
+                        row_value_sel.append(row_value[table_purchase_title_req_position[0]])
                         #日期转换，首行除外
-                        goods_issue_date=datetime(*xldate_as_tuple(row_value[4],0))
+                        goods_issue_date=datetime(*xldate_as_tuple(row_value[table_purchase_title_req_position[1]],0))
                         row_value_sel.append(goods_issue_date.strftime('%Y-%m-%d'))
-                        row_value_sel.append(row_value[10])
-                        row_value_sel.append(row_value[12])
-                        row_value_sel.append(row_value[13])
-                        row_value_sel.append(row_value[22])
+                        row_value_sel.append(row_value[table_purchase_title_req_position[2]])
+                        row_value_sel.append(row_value[table_purchase_title_req_position[3]])
+                        row_value_sel.append(row_value[table_purchase_title_req_position[4]])
+                        row_value_sel.append(row_value[table_purchase_title_req_position[5]])
                         row_value_sel.append(goods_owner)
                         serial_number+=10
                         row_value_sel.append(str(serial_number))
-                        row_value_sel.append(row_value[24])
-                        row_value_sel.append(row_value[25])
+                        row_value_sel.append(row_value[table_purchase_title_req_position[6]])
+                        row_value_sel.append(row_value[table_purchase_title_req_position[7]])
 
                         print(row_num,row_value_sel)
                         write.writerow(row_value_sel)
 
 
 if __name__ == '__main__':
-    #xlsx_to_csv_delivery_multi('E:\STUDY\python\XLSXtoCSV\BEKOautowarehouse\delivery', 'export.XLSX')
-    xlsx_to_csv_purchase('E:\STUDY\python\XLSXtoCSV\BEKOautowarehouse\purchase', '4500226596.XLSX')
+    xlsx_to_csv_delivery_multi('E:\STUDY\python\XLSXtoCSV\BEKOautowarehouse\delivery', 'export.XLSX')
+    #xlsx_to_csv_purchase('E:\STUDY\python\XLSXtoCSV\BEKOautowarehouse\purchase', '4500226596.XLSX')
