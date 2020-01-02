@@ -21,7 +21,7 @@ if yes_no_convert=='y':
         for filename_purchase in filename_purchases:
             #检查文件格式
             if os.path.splitext(filename_purchase)[1]=='.XLSX':
-                convf_.xlsx_to_csv_purchase(filename_purchase_path, filename_purchase)
+                convf_.xlsx_to_csv_purchase_multi(filename_purchase_path, filename_purchase)
                 purchase_file_num+=1
         print(purchase_file_num, ' purchase files convert')
     else:
