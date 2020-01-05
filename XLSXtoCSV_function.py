@@ -15,20 +15,27 @@ def xlsx_to_csv_purchase_multi(filename_purchase_path, filename_purchase):
                                     'Order Quantity','Order Unit']
 
     try:
+        #打开文件
         workbook_purchase = xlrd.open_workbook(filename_purchase_read)
-    except xlrd.biffh.XLRDError:
-        print('unsupported format')
-    else:
+
         table_purchase = workbook_purchase.sheet_by_index(0)
 
-        # 根据内容检索表头位置
+        # 根据所需内容检索表头位置
         table_purchase_title = table_purchase.row_values(0)
-        print(table_purchase.row_values(0))
+        #print(table_purchase.row_values(0))
         table_purchase_title_req_position = []
         for table_purchase_title_req in table_purchase_title_req_all:
             table_purchase_title_req_position.append(table_purchase_title.index(table_purchase_title_req))
-        print(table_purchase_title_req_position)
+        #print(table_purchase_title_req_position)
 
+    except xlrd.biffh.XLRDError as error:
+        print('打开采购文件',filename_purchase,'时发生错误:',error)
+
+    except ValueError as error:
+        print('读取采购文件',filename_purchase,'时发生错误:',error)
+
+    else:
+        #读取采购订单编号
         purchase_order_names = []
         for row_num in range(table_purchase.nrows - 1):
             purchase_order_names.append(table_purchase.row_values(row_num + 1)[table_purchase_title_req_position[1]])
@@ -36,6 +43,7 @@ def xlsx_to_csv_purchase_multi(filename_purchase_path, filename_purchase):
         purchase_order_names_new = list(set(purchase_order_names))
         purchase_order_names_new.sort(key=purchase_order_names.index)
         # print(purchase_order_names_new)
+
 
         for purchase_order_name in purchase_order_names_new:
             filename_purchase_write = os.path.join(filename_purchase_path, purchase_order_name + '.csv')
@@ -79,19 +87,25 @@ def xlsx_to_csv_delivery_multi(filename_delivery_path, filename_delivery):
 
     try:
         workbook_delivery = xlrd.open_workbook(filename_delivery_read)
-    except xlrd.biffh.XLRDError:
-        print('unsupported format')
-    else:
+
         table_delivery = workbook_delivery.sheet_by_index(0)
 
         # 根据内容检索表头位置
         table_delivery_title = table_delivery.row_values(0)
-        print(table_delivery.row_values(0))
+        #print(table_delivery.row_values(0))
         table_delivery_title_req_position = []
         for table_delivery_title_req in table_delivery_title_req_all:
             table_delivery_title_req_position.append(table_delivery_title.index(table_delivery_title_req))
-        print(table_delivery_title_req_position)
-        
+        #print(table_delivery_title_req_position)
+
+    except xlrd.biffh.XLRDError as error:
+        print('打开发货文件',filename_delivery,'时发生错误:',error)
+
+    except ValueError as error:
+        print('读取发货文件',filename_delivery,'时发生错误:',error)
+
+    else:
+        # 读取发货订单编号
         delivery_order_names=[]
         for row_num in range(table_delivery.nrows-1):
             delivery_order_names.append(table_delivery.row_values(row_num+1)[table_delivery_title_req_position[0]])
