@@ -2,6 +2,7 @@
 import XLSXtoCSV_function as convf_
 import os
 
+print('贝克欧SAP-立库文件转换,测试版1,20200106')
 yes_no_convert=input("请输入字母'y'开始转换:")
 
 filename_purchase_path='D:\BEKOautowarehouse\purchase'
@@ -37,3 +38,5 @@ if yes_no_convert in ['y','Y']:
         print(delivery_file_num, ' 发货文件转换(非成功，请复核)','\n')
     else:
         print('无可转换的发货文件存在','\n')
+
+    input('请输入任意键退出')
