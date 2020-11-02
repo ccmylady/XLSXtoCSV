@@ -63,8 +63,8 @@ def xlsx_to_csv_purchase_multi(filename_purchase_path, filename_purchase):
                         write.writerow(row_value_sel)
                     elif row_value[table_purchase_title_req_position[1]] == purchase_order_name:
                         row_value = table_purchase.row_values(row_num)
-                        row_value_sel.append(row_value[table_purchase_title_req_position[0]][0:6])
-                        row_value_sel.append(row_value[table_purchase_title_req_position[0]][6:].strip())
+                        row_value_sel.append(row_value[table_purchase_title_req_position[0]][0:11].strip())
+                        row_value_sel.append(row_value[table_purchase_title_req_position[0]][11:].strip())
                         row_value_sel.append(row_value[table_purchase_title_req_position[1]])
                         row_value_sel.append(row_value[table_purchase_title_req_position[2]])
                         row_value_sel.append(row_value[table_purchase_title_req_position[3]])
@@ -114,10 +114,13 @@ def xlsx_to_csv_delivery_multi(filename_delivery_path, filename_delivery):
         delivery_order_names_new.sort(key=delivery_order_names.index)
         #print(delivery_order_names_new)
 
+        goods_owner_reminder = "Please input goods owner '0410/0410/others?' for order " + 'delivery_order_names' + ': '
+        goods_owner = input(goods_owner_reminder)
+
         for delivery_order_name in delivery_order_names_new:
             filename_delivery_write=os.path.join(filename_delivery_path,delivery_order_name+'.csv')
-            goods_owner_reminder="Please input goods owner '0410/0410/others?' for order "+delivery_order_name+': '
-            goods_owner=input(goods_owner_reminder)
+            # goods_owner_reminder="Please input goods owner '0410/0410/others?' for order "+delivery_order_name+': '
+            # goods_owner=input(goods_owner_reminder)
             with codecs.open(filename_delivery_write,'w',encoding='utf-8') as f:
                 write = csv.writer(f)
                 serial_number=0

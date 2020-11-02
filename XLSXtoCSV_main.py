@@ -2,7 +2,7 @@
 import XLSXtoCSV_function as convf_
 import os
 
-print('贝克欧SAP-立库文件转换,测试版1,20200106')
+print('贝克欧SAP-立库文件转换,测试版2,20201023')
 yes_no_convert=input("请输入字母'y'开始转换:")
 
 filename_purchase_path='D:\BEKOautowarehouse\purchase'
