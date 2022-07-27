@@ -9,6 +9,7 @@ import os
 
 def xlsx_to_csv_purchase_multi(filename_purchase_path, filename_purchase):
     """转换xlsx采购文件至csv文件"""
+    print('===========采购入库xlsx文件转csv文件程序开始===========')
     # 打开并读取xlsx文件
     filename_purchase_read = os.path.join(filename_purchase_path, filename_purchase)
     table_purchase_title_req_all = ['Vendor/supplying plant','Purchasing Document','Material','Short Text','Plant',
@@ -49,7 +50,7 @@ def xlsx_to_csv_purchase_multi(filename_purchase_path, filename_purchase):
             filename_purchase_write = os.path.join(filename_purchase_path, purchase_order_name + '.csv')
             #goods_owner_reminder = "Please input goods owner '0410/0410/others?' for order " + purchase_order_name + ': '
             #goods_owner = input(goods_owner_reminder)
-            with codecs.open(filename_purchase_write, 'w', encoding='utf-8') as f:
+            with codecs.open(filename_purchase_write, 'w', encoding='gbk') as f:
                 write = csv.writer(f)
                 serial_number = 0
                 for row_num in range(table_purchase.nrows):
@@ -75,15 +76,17 @@ def xlsx_to_csv_purchase_multi(filename_purchase_path, filename_purchase):
 
                         print(row_num, row_value_sel)
                         write.writerow(row_value_sel)
-
+        print('===========采购入库xlsx文件转csv文件程序结束===========\n')
 
 def xlsx_to_csv_delivery_multi(filename_delivery_path, filename_delivery):
     """转换xlsx发货文件至csv文件"""
+    print('===========销售出库xlsx文件转csv文件程序开始===========')
     #打开并读取xlsx文件
     filename_delivery_read=os.path.join(filename_delivery_path,filename_delivery)
-    table_delivery_title_req_all = ['Delivery', 'Goods Issue Date','Ship-to party', 'Name of the ship-to party',
+    table_delivery_title_req_all = ['Delivery', 'Goods Issue Date','Sold-to party', 'Name of sold-to party',
                                     'Reference document','Material', 'Item','Description','Delivery quantity',
                                     'Purchase order number']
+    table_delivery_title_req_Picking_status='Picking status'
 
     try:
         workbook_delivery = xlrd.open_workbook(filename_delivery_read)
@@ -96,7 +99,15 @@ def xlsx_to_csv_delivery_multi(filename_delivery_path, filename_delivery):
         table_delivery_title_req_position = []
         for table_delivery_title_req in table_delivery_title_req_all:
             table_delivery_title_req_position.append(table_delivery_title.index(table_delivery_title_req))
+
+        # 当存在picking status时，按picking status判断，否则默认全部转。
+        if table_delivery_title_req_Picking_status in table_delivery_title:
+            print('****文件中存在picking status，将以其值作为依据****')
+            picking_status_onoff=True
+            picking_status_position=table_delivery_title.index(table_delivery_title_req_Picking_status)
         #print(table_delivery_title_req_position)
+
+
 
     except xlrd.biffh.XLRDError as error:
         print('打开发货文件',filename_delivery,'时发生错误:',error)
@@ -114,14 +125,17 @@ def xlsx_to_csv_delivery_multi(filename_delivery_path, filename_delivery):
         delivery_order_names_new.sort(key=delivery_order_names.index)
         #print(delivery_order_names_new)
 
-        goods_owner_reminder = "Please input goods owner '0410/0410/others?' for order " + 'delivery_order_names' + ': '
-        goods_owner = input(goods_owner_reminder)
+        # goods_owner_reminder = "Please input goods owner '0410/0410/others?' for order " + 'delivery_order_names' + ': '
+        # goods_owner = input(goods_owner_reminder)
+        goods_owner = "0410"
+        count_of_UnicodeEncodeError=0
 
         for delivery_order_name in delivery_order_names_new:
             filename_delivery_write=os.path.join(filename_delivery_path,delivery_order_name+'.csv')
             # goods_owner_reminder="Please input goods owner '0410/0410/others?' for order "+delivery_order_name+': '
             # goods_owner=input(goods_owner_reminder)
-            with codecs.open(filename_delivery_write,'w',encoding='utf-8') as f:
+            # 'GB18030'
+            with codecs.open(filename_delivery_write,'w',encoding='GBK') as f:
                 write = csv.writer(f)
                 serial_number=0
                 for row_num in range(table_delivery.nrows):
@@ -133,26 +147,41 @@ def xlsx_to_csv_delivery_multi(filename_delivery_path, filename_delivery):
                         print(row_num,row_value_sel)
                         write.writerow(row_value_sel)
                     elif row_value[table_delivery_title_req_position[0]]==delivery_order_name:
-                        row_value_sel.append(row_value[table_delivery_title_req_position[0]])
-                        #日期转换，首行除外
-                        goods_issue_date=datetime(*xldate_as_tuple(row_value[table_delivery_title_req_position[1]],0))
-                        row_value_sel.append(goods_issue_date.strftime('%Y-%m-%d'))
-                        row_value_sel.append(row_value[table_delivery_title_req_position[2]])
-                        row_value_sel.append(row_value[table_delivery_title_req_position[3]])
-                        row_value_sel.append(row_value[table_delivery_title_req_position[4]])
-                        row_value_sel.append(row_value[table_delivery_title_req_position[5]])
-                        row_value_sel.append(goods_owner)
-                        #serial_number+=10
-                        #row_value_sel.append(str(serial_number))
-                        row_value_sel.append(row_value[table_delivery_title_req_position[6]])
-                        row_value_sel.append(row_value[table_delivery_title_req_position[7]])
-                        row_value_sel.append(row_value[table_delivery_title_req_position[8]])
-                        row_value_sel.append(row_value[table_delivery_title_req_position[9]])
+                        if picking_status_onoff and row_value[picking_status_position] != 'C':
+                            print('{} **{} 发运单中物料 {} {} 被识别为忽略代码，无需出库'.format(
+                                row_num,
+                                row_value[table_delivery_title_req_position[0]],
+                                row_value[table_delivery_title_req_position[5]],
+                                row_value[table_delivery_title_req_position[7]]))
+                            continue
+                        else:
+                            row_value_sel.append(row_value[table_delivery_title_req_position[0]])
+                            #日期转换，首行除外
+                            goods_issue_date=datetime(*xldate_as_tuple(row_value[table_delivery_title_req_position[1]],0))
+                            row_value_sel.append(goods_issue_date.strftime('%Y-%m-%d'))
+                            row_value_sel.append(row_value[table_delivery_title_req_position[2]])
+                            row_value_sel.append(row_value[table_delivery_title_req_position[3]])
+                            row_value_sel.append(row_value[table_delivery_title_req_position[4]])
+                            row_value_sel.append(row_value[table_delivery_title_req_position[5]])
+                            row_value_sel.append(goods_owner)
+                            #serial_number+=10
+                            #row_value_sel.append(str(serial_number))
+                            row_value_sel.append(row_value[table_delivery_title_req_position[6]])
+                            row_value_sel.append(row_value[table_delivery_title_req_position[7]])
+                            row_value_sel.append(row_value[table_delivery_title_req_position[8]])
+                            row_value_sel.append(row_value[table_delivery_title_req_position[9]])
 
-                        print(row_num,row_value_sel)
-                        write.writerow(row_value_sel)
+                            print(row_num,row_value_sel)
+                            try:
+                                write.writerow(row_value_sel)
+                            except UnicodeEncodeError:
+                                row_value_sel[8]='?物料描述存在未知字符?'
+                                write.writerow(row_value_sel)
+                                count_of_UnicodeEncodeError+=1
+                                print('***物料名称描述中存在未知字符?,已替换，计数{}***'.format(count_of_UnicodeEncodeError))
 
+        print('===========销售出库xlsx文件转csv文件程序结束===========\n')
 
 if __name__ == '__main__':
-    xlsx_to_csv_delivery_multi('E:\STUDYing\PYTHON\Example\BEKOautowarehouse\delivery', 'export.XLSX')
-    xlsx_to_csv_purchase_multi('E:\STUDYing\PYTHON\Example\BEKOautowarehouse\purchase', 'export2.XLSX')
+    xlsx_to_csv_delivery_multi(r'E:\STUDYing\PYTHON\Example\BEKOautowarehouse\delivery', 'export.XLSX')
+    xlsx_to_csv_purchase_multi(r'E:\STUDYing\PYTHON\Example\BEKOautowarehouse\purchase', 'export2.XLSX')

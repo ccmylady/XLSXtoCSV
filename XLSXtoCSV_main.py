@@ -1,13 +1,24 @@
 # coding=utf-8
+import logging
+logging.basicConfig(level=logging.DEBUG,
+                    format="%(asctime)s - %(levelname)s - %(message)s"
+                    ,datefmt="%Y-%m-%d %H:%M:%S"
+                    )
+
 import XLSXtoCSV_function as convf_
 import os
 
-print('贝克欧SAP-立库文件转换,测试版2,20201023')
+print('========贝克欧SAP-立库文件转换,测试版4,20220320========')
+print(r'==*重要*==0410出库专用,发货订单自动录入0410,自动识别picking status,'
+      r'无法识别的物料描述整体替换,'
+      r'保存转换于C:\BEKOautowarehouse\目录下========')
+print('\n========XLSXtoCSV转换开始========')
+
 yes_no_convert=input("请输入字母'y'开始转换:")
 
-filename_purchase_path='D:\BEKOautowarehouse\purchase'
-filename_delivery_path='D:\BEKOautowarehouse\delivery'
-filename_manufacture_path='D:\BEKOautowarehouse\manufacture'
+filename_purchase_path=r'C:\BEKOautowarehouse\purchase'
+filename_delivery_path=r'C:\BEKOautowarehouse\delivery'
+filename_manufacture_path=r'C:\BEKOautowarehouse\manufacture'
 
 #确认是否转换
 if yes_no_convert in ['y','Y']:
@@ -26,7 +37,7 @@ if yes_no_convert in ['y','Y']:
                 purchase_file_num+=1
         print(purchase_file_num, ' 采购文件转换(非成功，请复核)','\n')
     else:
-        print('无可转换的采购文件存在','\n')
+        print('****无可转换的采购文件存在****\n')
 
     if len(filename_deliverys):
         delivery_file_num=0
@@ -37,6 +48,9 @@ if yes_no_convert in ['y','Y']:
                 delivery_file_num+=1
         print(delivery_file_num, ' 发货文件转换(非成功，请复核)','\n')
     else:
-        print('无可转换的发货文件存在','\n')
+        print('========无可转换的发货文件存在========\n')
 
+    print('========XLSXtoCSV转换结束========')
     input('请输入任意键退出')
+
+
