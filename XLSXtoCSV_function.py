@@ -1,10 +1,37 @@
 # coding=utf-8
+import logging
+logging.basicConfig(level=logging.DEBUG,
+                    format="%(asctime)s - %(levelname)s - %(message)s"
+                    ,datefmt="%Y-%m-%d %H:%M:%S"
+                    )
+
 import xlrd
 from xlrd import xldate_as_tuple
 import csv
 import codecs
 from datetime import datetime
 import os
+
+def create_folder(path):
+    # 年-月-日 时：分：秒
+    now_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+    foldername = os.path.join(path,now_time)
+
+    # 判断文件是否存在：不存在创建
+    if not os.path.exists(foldername):
+        os.makedirs(foldername)
+
+    return foldername
+
+def unknown_character_replace(originstring):
+    """检测未知字符，并替换"""
+    character_notin_gbk = {'1¼': '1 1/4', '1½': '1 1/2', '1¾': '1 3/4',
+                           '¼': '1/4', '½': '1/2', '¾': '3/4',
+                           '»': '>>', '«': '<<','Ä':'A'}
+    for key,value in character_notin_gbk.items():
+        originstring=originstring.replace(key,value)
+
+    return originstring
 
 
 def xlsx_to_csv_purchase_multi(filename_purchase_path, filename_purchase):
@@ -38,6 +65,9 @@ def xlsx_to_csv_purchase_multi(filename_purchase_path, filename_purchase):
     else:
         #读取采购订单编号
         purchase_order_names = []
+        count_of_UnicodeEncodeError_changed = 0
+        count_of_UnicodeEncodeError_unchange = 0
+
         for row_num in range(table_purchase.nrows - 1):
             purchase_order_names.append(table_purchase.row_values(row_num + 1)[table_purchase_title_req_position[1]])
         # print(purchase_order_names)
@@ -75,7 +105,21 @@ def xlsx_to_csv_purchase_multi(filename_purchase_path, filename_purchase):
                         row_value_sel.append(row_value[table_purchase_title_req_position[6]])
 
                         print(row_num, row_value_sel)
-                        write.writerow(row_value_sel)
+                        try:
+                            write.writerow(row_value_sel)
+                        except UnicodeEncodeError:
+                            try:
+                                row_value_sel[4] = unknown_character_replace(row_value_sel[4])
+                                write.writerow(row_value_sel)
+                                count_of_UnicodeEncodeError_changed += 1
+                                print('***采购入库物料名称描述中存在未知字符?,已替换，计数{}***'.format(count_of_UnicodeEncodeError_changed))
+                            except UnicodeEncodeError:
+                                row_value_sel[4] = '?物料描述存在未知字符?'
+                                write.writerow(row_value_sel)
+                                count_of_UnicodeEncodeError_unchange += 1
+                                print('***采购入库物料名称描述中存在未知字符?,单独替换不成功，已整体替换，计数{}***'.format(
+                                    count_of_UnicodeEncodeError_changed))
+
         print('===========采购入库xlsx文件转csv文件程序结束===========\n')
 
 def xlsx_to_csv_delivery_multi(filename_delivery_path, filename_delivery):
@@ -128,7 +172,8 @@ def xlsx_to_csv_delivery_multi(filename_delivery_path, filename_delivery):
         # goods_owner_reminder = "Please input goods owner '0410/0410/others?' for order " + 'delivery_order_names' + ': '
         # goods_owner = input(goods_owner_reminder)
         goods_owner = "0410"
-        count_of_UnicodeEncodeError=0
+        count_of_UnicodeEncodeError_changed=0
+        count_of_UnicodeEncodeError_unchange=0
 
         for delivery_order_name in delivery_order_names_new:
             filename_delivery_write=os.path.join(filename_delivery_path,delivery_order_name+'.csv')
@@ -175,13 +220,20 @@ def xlsx_to_csv_delivery_multi(filename_delivery_path, filename_delivery):
                             try:
                                 write.writerow(row_value_sel)
                             except UnicodeEncodeError:
-                                row_value_sel[8]='?物料描述存在未知字符?'
-                                write.writerow(row_value_sel)
-                                count_of_UnicodeEncodeError+=1
-                                print('***物料名称描述中存在未知字符?,已替换，计数{}***'.format(count_of_UnicodeEncodeError))
+                                try:
+                                    row_value_sel[8]=unknown_character_replace(row_value_sel[8])
+                                    write.writerow(row_value_sel)
+                                    count_of_UnicodeEncodeError_changed += 1
+                                    print('***物料名称描述中存在未知字符?,已替换，计数{}***'.format(count_of_UnicodeEncodeError_changed))
+                                except UnicodeEncodeError:
+                                    row_value_sel[8]='?物料描述存在未知字符?'
+                                    write.writerow(row_value_sel)
+                                    count_of_UnicodeEncodeError_unchange+=1
+                                    print('***物料名称描述中存在未知字符?,单独替换不成功，已整体替换，计数{}***'.format(count_of_UnicodeEncodeError_changed))
 
         print('===========销售出库xlsx文件转csv文件程序结束===========\n')
 
 if __name__ == '__main__':
-    xlsx_to_csv_delivery_multi(r'E:\STUDYing\PYTHON\Example\BEKOautowarehouse\delivery', 'export.XLSX')
-    xlsx_to_csv_purchase_multi(r'E:\STUDYing\PYTHON\Example\BEKOautowarehouse\purchase', 'export2.XLSX')
+    logging.debug("now in function")
+    # xlsx_to_csv_delivery_multi(r'E:\STUDYing\PYTHON\Example\BEKOautowarehouse\delivery', 'export.XLSX')
+    # xlsx_to_csv_purchase_multi(r'E:\STUDYing\PYTHON\Example\BEKOautowarehouse\purchase', 'export2.XLSX')
