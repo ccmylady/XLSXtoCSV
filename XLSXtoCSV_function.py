@@ -11,6 +11,7 @@ import csv
 import codecs
 from datetime import datetime
 import os
+import shutil
 
 def create_folder(path):
     # 年-月-日 时：分：秒
@@ -32,6 +33,22 @@ def unknown_character_replace(originstring):
         originstring=originstring.replace(key,value)
 
     return originstring
+
+def csvfiles_copy(origin,target):
+    """
+    将origin目录下的所有csv文件，复制到target目录下
+    :param origin:
+    :param target:
+    :return:
+    """
+    num=0
+    for file in os.listdir(origin):
+        if os.path.splitext(file)[1].lower() == '.csv':
+            path_origin=os.path.join(origin,file)
+            path_target=os.path.join(target,file)
+            shutil.copyfile(path_origin,path_target)
+            num+=1
+    print("{}个文件已复制\n".format(num))
 
 
 def xlsx_to_csv_purchase_multi(filename_purchase_path, filename_purchase):
