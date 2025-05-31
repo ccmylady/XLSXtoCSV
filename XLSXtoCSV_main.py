@@ -1,5 +1,8 @@
 # coding=utf-8
 import logging
+
+# from XLSXtoCSV_function import read_config
+
 logging.basicConfig(level=logging.DEBUG,
                     format="%(asctime)s - %(levelname)s - %(message)s"
                     ,datefmt="%Y-%m-%d %H:%M:%S"
@@ -9,26 +12,52 @@ import XLSXtoCSV_function as convf_
 import os
 import shutil
 import time
+import configparser
 
-msg=r'''=======================贝克欧SAP-立库文件转换,版本号0.0.0.220826_beta,联系人:XPC=======================
+msg=r'''=======================贝克欧SAP-立库文件转换,版本号0.0.1.241231_beta,联系人:XPC=======================
 ==*重要*==0410出库专用,发货订单自动录入0410,自动识别picking status,
 无法识别的物料描述先库内替换，如无则整体替换,
-读取\\10.22.3.6\订单数据\SAPxx订单目录下文件，转换成CSV文件保存至\\10.22.3.6\订单数据\xx订单目录下，==='''
+读取应用程序所在目录下的config文件，查询待转换文件及转换后CSV文件的保存目录，执行转化并保存==='''
 
 print(msg)
 print('\n==============================XLSXtoCSV转换开始==============================')
 
 yes_no_convert=input("请输入字母'y'或'Y'开始转换:")
 
-path_filename_purchase_origin= r'\\10.22.3.6\订单数据\92 SAP采购订单'
-path_filename_delivery_origin= r'\\10.22.3.6\订单数据\90 SAP销售订单'
-path_filename_manufacture_origin= r'\\10.22.3.6\订单数据\91 SAP生产订单'
-path_filename_purchase_converted= r'\\10.22.3.6\订单数据\92 SAP采购订单\1 conversion_record_purc'
-path_filename_delivery_converted= r'\\10.22.3.6\订单数据\90 SAP销售订单\1 conversion_record_sale'
-path_filename_manufacture_converted= r'\\10.22.3.6\订单数据\91 SAP生产订单\1 conversion_record_manu'
-path_filename_purchase_action= r'\\10.22.3.6\订单数据\采购订单'
-path_filename_delivery_action= r'\\10.22.3.6\订单数据\销售订单'
-path_filename_manufacture_action= r'\\10.22.3.6\订单数据\生产订单'
+# path_filename_purchase_origin= r'\\10.22.3.6\订单数据\92 SAP采购订单'
+# path_filename_delivery_origin= r'\\10.22.3.6\订单数据\90 SAP销售订单'
+# path_filename_manufacture_origin= r'\\10.22.3.6\订单数据\91 SAP生产订单'
+# path_filename_purchase_converted= r'\\10.22.3.6\订单数据\92 SAP采购订单\1 conversion_record_purc'
+# path_filename_delivery_converted= r'\\10.22.3.6\订单数据\90 SAP销售订单\1 conversion_record_sale'
+# path_filename_manufacture_converted= r'\\10.22.3.6\订单数据\91 SAP生产订单\1 conversion_record_manu'
+# path_filename_purchase_action= r'\\10.22.3.6\订单数据\采购订单'
+# path_filename_delivery_action= r'\\10.22.3.6\订单数据\销售订单'
+# path_filename_manufacture_action= r'\\10.22.3.6\订单数据\生产订单'
+# print(os.path.dirname(__file__))
+
+# 获取当前脚本所在的目录
+# config_path = read_config()
+config_path = r'C:\BEKOautowarehouse\config.ini'
+# logging.debug(config_path)
+
+# 创建配置解析器对象
+config = configparser.ConfigParser()
+
+# 读取配置文件
+config.read(config_path,encoding='UTF-8')
+
+# 获取数据库相关配置
+path_filename_purchase_origin= config.get('database', 'path_filename_purchase_origin')
+path_filename_delivery_origin= config.get('database', 'path_filename_delivery_origin')
+path_filename_manufacture_origin= config.get('database', 'path_filename_delivery_origin')
+path_filename_purchase_converted= config.get('database', 'path_filename_purchase_converted')
+path_filename_delivery_converted= config.get('database', 'path_filename_delivery_converted')
+path_filename_manufacture_converted= config.get('database', 'path_filename_manufacture_converted')
+path_filename_purchase_action= config.get('database', 'path_filename_purchase_action')
+path_filename_delivery_action= config.get('database', 'path_filename_delivery_action')
+path_filename_manufacture_action= config.get('database', 'path_filename_manufacture_action')
+
+# print(path_filename_purchase_origin)
 filename_purchases=[]
 filename_deliverys=[]
 

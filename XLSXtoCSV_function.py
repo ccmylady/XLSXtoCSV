@@ -13,6 +13,21 @@ from datetime import datetime
 import os
 import shutil
 
+# def read_config():
+#     # 获取exe文件所在目录
+#     current_directory = os.path.dirname(os.path.abspath(__file__))
+#
+#     # 配置文件路径
+#     config_path = os.path.join(current_directory, 'config.ini')
+#     logging.debug(config_path)
+#
+#     # 检查文件是否存在
+#     if not os.path.exists(config_path):
+#         print(f"Error: Config file not found at {config_path}")
+#         return
+#
+#     return config_path
+
 def create_folder(path):
     # 年-月-日 时：分：秒
     now_time = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -252,5 +267,5 @@ def xlsx_to_csv_delivery_multi(filename_delivery_path, filename_delivery):
 
 if __name__ == '__main__':
     logging.debug("now in function")
-    # xlsx_to_csv_delivery_multi(r'E:\STUDYing\PYTHON\Example\BEKOautowarehouse\delivery', 'export.XLSX')
-    # xlsx_to_csv_purchase_multi(r'E:\STUDYing\PYTHON\Example\BEKOautowarehouse\purchase', 'export2.XLSX')
+    # xlsx_to_csv_delivery_multi(r'C:\BEKOautowarehouse\delivery', 'export.XLSX')
+    xlsx_to_csv_purchase_multi(r'C:\BEKOautowarehouse\purchase', '立库.XLSX')
