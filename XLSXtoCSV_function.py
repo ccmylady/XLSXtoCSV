@@ -11,6 +11,22 @@ import csv
 import codecs
 from datetime import datetime
 import os
+import shutil
+
+# def read_config():
+#     # 获取exe文件所在目录
+#     current_directory = os.path.dirname(os.path.abspath(__file__))
+#
+#     # 配置文件路径
+#     config_path = os.path.join(current_directory, 'config.ini')
+#     logging.debug(config_path)
+#
+#     # 检查文件是否存在
+#     if not os.path.exists(config_path):
+#         print(f"Error: Config file not found at {config_path}")
+#         return
+#
+#     return config_path
 
 def create_folder(path):
     # 年-月-日 时：分：秒
@@ -32,6 +48,22 @@ def unknown_character_replace(originstring):
         originstring=originstring.replace(key,value)
 
     return originstring
+
+def csvfiles_copy(origin,target):
+    """
+    将origin目录下的所有csv文件，复制到target目录下
+    :param origin:
+    :param target:
+    :return:
+    """
+    num=0
+    for file in os.listdir(origin):
+        if os.path.splitext(file)[1].lower() == '.csv':
+            path_origin=os.path.join(origin,file)
+            path_target=os.path.join(target,file)
+            shutil.copyfile(path_origin,path_target)
+            num+=1
+    print("{}个文件已复制\n".format(num))
 
 
 def xlsx_to_csv_purchase_multi(filename_purchase_path, filename_purchase):
@@ -235,5 +267,5 @@ def xlsx_to_csv_delivery_multi(filename_delivery_path, filename_delivery):
 
 if __name__ == '__main__':
     logging.debug("now in function")
-    # xlsx_to_csv_delivery_multi(r'E:\STUDYing\PYTHON\Example\BEKOautowarehouse\delivery', 'export.XLSX')
-    # xlsx_to_csv_purchase_multi(r'E:\STUDYing\PYTHON\Example\BEKOautowarehouse\purchase', 'export2.XLSX')
+    # xlsx_to_csv_delivery_multi(r'C:\BEKOautowarehouse\delivery', 'export.XLSX')
+    xlsx_to_csv_purchase_multi(r'C:\BEKOautowarehouse\purchase', '立库.XLSX')
